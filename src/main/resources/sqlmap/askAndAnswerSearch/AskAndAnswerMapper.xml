@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.daoke.mobileserver.splitwordsearch.entity.AskAndAnswer">
+	<!--通过分词查询，总记录的条数-->
+	<select id="getCountBySplitWord" parameterType="java.util.Map" resultType="java.lang.Integer">
+		select count(id) from askAndAnswer where 1=1 and id in (select askAndAnswerID from titleIndex
+		where 1=1 AND
+		<!--<foreach collection="splitWordLike" item="splitWordItem" separator="or">-->
+			#{splitWordLike}
+		<!--</foreach>-->
+
+		)OR
+		( #{contentLike})
+	<!--<foreach collection="contentLike" item="contentLikeItem" separator="or" open="(" close=")">
+        #{contentLikeItem}
+    </foreach>-->
+
+</select>
+
+
+<!--通过分词查询，指定记录的总条数-->
+	<select id="getListBySplitWord" parameterType="java.util.Map" resultType="com.daoke.mobileserver.splitwordsearch.entity.AskAndAnswer">
+		select id,questionType,question,answer,fileUrl,createDate,updateDate from askAndAnswer where 1=1 and id in (select askAndAnswerID from titleIndex
+		where 1=1 AND
+		<!--<foreach collection="splitWordLike" item="splitWordItem" separator="or">-->
+			#{splitWordLike}
+		<!--</foreach>-->
+		)
+		OR
+		<!--<foreach collection="contentLike" item="contentLikeItem" separator="or" open="(" close=")">-->
+		(#{contentLike})
+		<!--</foreach>-->
+
+		limit #{startPlace},#{size}
+
+	</select>
+
+
+	<!--根据问题类型查询记录的总条数-->
+	<select id="getCountByQuestionType" parameterType="java.util.Map" resultType="java.lang.Integer">
+		select count(id) from askAndAnswer where 1=1 and questionType = #{questionType}
+	</select>
+
+	<!--根据问题类型查询详细信息-->
+	<select id="getListByQuestionType" parameterType="java.util.Map" resultType="com.daoke.mobileserver.splitwordsearch.entity.AskAndAnswer">
+		select id,questionType,question,answer,fileUrl,createDate,updateDate from askAndAnswer where 1=1 and questionType = #{questionType} limit #{startPlace},#{size}
+	</select>
+
+</mapper>

@@ -1,0 +1,14 @@
+package com.daoke.mobileserver.common.dao;
+
+
+import org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource;
+
+
+public class DynamicRoutingDataSource  extends AbstractRoutingDataSource {
+	
+	@Override
+    protected Object determineCurrentLookupKey() {
+        return DataSourceContextHolder.getDataSourceType();
+    }
+
+}

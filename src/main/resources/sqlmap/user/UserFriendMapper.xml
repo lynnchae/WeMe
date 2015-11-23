@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="userFriend">
+    <!--获取当前用户添加的所有好友-->
+    <select id="getAllFriends" parameterType="java.lang.String" resultType="com.daoke.mobileserver.user.entity.UserFriend">
+    <![CDATA[
+        SELECT * FROM userFriend where delFlag=1 AND isValid=1 AND isAgree=1 AND (accountID = #{accountID} OR friendAccountID=#{accountID})
+    ]]>
+    </select>
+    <!--分页查询当前用户的好友-->
+    <select id="pageQueryFriends" resultType="com.daoke.mobileserver.user.entity.UserFriend">
+        SELECT * FROM userFriend where delFlag=1 AND isValid=1 AND isAgree=1 AND (accountID = #{accountID} OR friendAccountID=#{accountID})
+         ORDER BY recordID asc limit #{firstCount},#{pagesize}
+    </select>
+    <!--分页查询当前用户的好友-->
+    <select id="pageQueryFriendsCount" resultType="java.lang.Integer">
+        SELECT count(1) FROM userFriend where delFlag=1 AND isValid=1 AND isAgree=1 AND (accountID = #{accountID} OR friendAccountID=#{accountID})
+    </select>
+    <!--查询是否为好友-->
+    <select id="queryIsFriend" resultType="java.lang.Integer" >
+        SELECT count(1) FROM userFriend WHERE isValid=1 and isAgree=1 AND
+            ((accountID=#{accountID} AND friendAccountID=#{friendAccountID}) or (accountID=#{friendAccountID} AND friendAccountID=#{accountID}))
+    </select>
+    <!--添加好友-->
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id" >
+        INSERT  INTO userFriend(accountID,friendAccountID,isAgree,delFlag,isValid) values(#{accountID},#{friendAccountID},#{isAgree},1,1);
+    </insert>
+
+    <!--修改是否同意-->
+    <update id="updateIsAgree" >
+        UPDATE userFriend SET isAgree=#{isAgree} WHERE isValid=1 AND  ((accountID=#{accountID} AND friendAccountID=#{friendAccountID}) or (accountID=#{friendAccountID} AND friendAccountID=#{accountID}));
+    </update>
+    <!--假删除-->
+    <update id="removeUserFriend" >
+        UPDATE userFriend SET isValid=0 WHERE isValid=1 and isAgree=1 AND  ((accountID=#{accountID} AND friendAccountID=#{friendAccountID}) or (accountID=#{friendAccountID} AND friendAccountID=#{accountID}));
+    </update>
+</mapper>

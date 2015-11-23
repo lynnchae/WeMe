@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="indexRankingDetail">
+    <!--要求 userGrade 表中的accountID要唯一-->
+    <select id="getMileageCostTimeDetail" resultType="com.daoke.mobileserver.user.entity.IndexRankingDetail">
+    <![CDATA[
+        SELECT wm.accountID AS accountID,mileageCostTime AS indexValue,userHeadName,nickName,grade
+        from
+        daoke_wemeMonthIndex wm LEFT JOIN userGrade ug
+        ON wm.accountID = ug.accountID
+        WHERE ug.isValid = 1 AND wm.status = 0 AND mileageCostTime !=0
+        ORDER BY mileageCostTime ASC LIMIT #{start},#{end}
+    ]]>
+    </select>
+    <!--要求 userGrade 表中的accountID要唯一-->
+    <select id="getMileageSumList" resultType="com.daoke.mobileserver.user.entity.IndexRankingDetail">
+        <![CDATA[
+        SELECT wm.accountID AS accountID,mileageSum AS indexValue,userHeadName,nickName,grade
+        from
+        daoke_wemeMonthIndex wm LEFT JOIN userGrade ug
+        ON wm.accountID = ug.accountID
+        WHERE ug.isValid = 1 AND wm.status = 0
+        ORDER BY mileageSum DESC LIMIT #{start},#{end}
+    ]]>
+    </select>
+
+    <!--要求 userGrade 表中的accountID要唯一-->
+    <select id="getMePointList" resultType="com.daoke.mobileserver.user.entity.IndexRankingDetail">
+        <![CDATA[
+        SELECT wm.accountID AS accountID,mePoint AS indexValue,userHeadName,nickName,grade
+        from
+        daoke_wemeMonthIndex wm LEFT JOIN userGrade ug
+        ON wm.accountID = ug.accountID
+        WHERE ug.isValid = 1 AND wm.status = 0
+        ORDER BY mePoint DESC LIMIT #{start},#{end}
+    ]]>
+    </select>
+    <!--要求 userGrade 表中的accountID要唯一-->
+    <select id="getDriverDaysList" resultType="com.daoke.mobileserver.user.entity.IndexRankingDetail">
+        <![CDATA[
+        SELECT wm.accountID AS accountID,driverDays AS indexValue,userHeadName,nickName,grade
+        from
+        daoke_wemeMonthIndex wm LEFT JOIN userGrade ug
+        ON wm.accountID = ug.accountID
+        WHERE ug.isValid = 1 AND wm.status = 0
+        ORDER BY driverDays DESC LIMIT #{start},#{end}
+    ]]>
+    </select>
+    <!--要求 userGrade 表中的accountID要唯一-->
+    <select id="getTweetCountList" resultType="com.daoke.mobileserver.user.entity.IndexRankingDetail">
+        <![CDATA[
+        SELECT wm.accountID AS accountID,tweetCount AS indexValue,userHeadName,nickName,grade
+        from
+        daoke_wemeMonthIndex wm LEFT JOIN userGrade ug
+        ON wm.accountID = ug.accountID
+        WHERE ug.isValid = 1 AND wm.status = 0
+        ORDER BY tweetCount DESC LIMIT #{start},#{end}
+    ]]>
+    </select>
+    <!--要求 userGrade 表中的accountID要唯一-->
+    <select id="getDriverGradeList" resultType="com.daoke.mobileserver.user.entity.IndexRankingDetail">
+        <![CDATA[
+        SELECT wm.accountID AS accountID,driverGrade AS indexValue,userHeadName,nickName,grade
+        from
+        daoke_wemeMonthIndex wm LEFT JOIN userGrade ug
+        ON wm.accountID = ug.accountID
+        WHERE ug.isValid = 1 AND wm.status = 0
+        ORDER BY driverGrade DESC LIMIT #{start},#{end}
+    ]]>
+    </select>
+</mapper>

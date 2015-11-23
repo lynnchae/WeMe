@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>    
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+	<settings>
+		<setting name="lazyLoadingEnabled" value="false" />
+        <setting name="cacheEnabled" value="true"/>
+	</settings>
+	<typeAliases>
+        <!--用户登录日志-->
+		<!--<typeAlias  alias ="userLoginLog" type="me.daoke.motorcade.entity.UserLoginLog"/>-->
+		<typeAlias  alias ="userRochelleRule" type="com.daoke.mobileserver.user.entity.UserRochelleRule"/>
+		<typeAlias  alias ="userRochelleDetail" type="com.daoke.mobileserver.user.entity.UserRochelleDetail"/>
+		<typeAlias  alias ="userGrade" type="com.daoke.mobileserver.user.entity.UserGrade"/>
+        <typeAlias  alias="userRankDetail" type="com.daoke.mobileserver.user.entity.UserRankDetail" />
+        <typeAlias alias="indexRankingDetail" type="com.daoke.mobileserver.user.entity.IndexRankingDetail"/>
+        <typeAlias alias="userFriend" type="com.daoke.mobileserver.user.entity.UserFriend"/>
+		<typeAlias  alias ="ratingRules" type="com.daoke.mobileserver.ratingRules.entity.RatingRules"/>
+		<typeAlias  alias ="shareTimesWeekly" type="com.daoke.mobileserver.shareTimesWeekly.entity.ShareTimesWeekly"/>
+		<typeAlias  alias ="friendSetting" type="com.daoke.mobileserver.user.entity.FriendSetting"/>
+		<typeAlias  alias ="userTalkRecord" type="com.daoke.mobileserver.user.entity.UserTalkRecord"/>
+		<typeAlias  alias ="messageCentre" type="com.daoke.mobileserver.user.entity.MessageCentre"/>
+		<typeAlias  alias ="reportInfo" type="com.daoke.mobileserver.user.entity.ReportInfo"/>
+		<typeAlias  alias ="serverChannel" type="com.daoke.mobileserver.channel.entity.ServerChannel"/>
+		<typeAlias  alias ="serverChannelMessage" type="com.daoke.mobileserver.channel.entity.ServerChannelMessage"/>
+		<typeAlias  alias ="serverMenu" type="com.daoke.mobileserver.channel.entity.ServerMenu"/>
+        <typeAlias alias="userMore" type="com.daoke.mobileserver.more.entity.UserMore"/>
+        <typeAlias alias="version" type="com.daoke.mobileserver.version.entity.Version"/>
+        <typeAlias alias="daokeWallet" type="com.daoke.mobileserver.mall.entity.DaokeWallet"/>
+	</typeAliases>
+
+    <!-- 增加mapper.xml文件 -->
+    <mappers>
+        <!--<mapper  resource ="sqlmap/user/userMapper.xml" />-->
+        <mapper  resource ="sqlmap/user/UserRochelleRuleMapper.xml" />
+        <mapper  resource ="sqlmap/user/UserRochelleDetailMapper.xml" />
+        <mapper  resource ="sqlmap/user/UserGradeMapper.xml" />
+        <mapper  resource="sqlmap/user/UserRankDetailMapper.xml/"/>
+        <mapper resource="sqlmap/user/IndexRankingDetailMapper.xml"/>
+        <mapper  resource ="sqlmap/ratingRules/RatingRulesMapper.xml" />
+        <mapper resource="sqlmap/user/UserFriendMapper.xml"/>
+        <mapper  resource ="sqlmap/shareTimesWeekly/ShareTimesWeeklyMapper.xml" />
+        <mapper resource="sqlmap/user/FriendSettingMapper.xml"/>
+        <mapper resource="sqlmap/user/UserTalkRecordMapper.xml"/>
+        <mapper resource="sqlmap/user/MessageCentreMapper.xml"/>
+        <mapper resource="sqlmap/user/MapMapper.xml"/>
+        <mapper resource="sqlmap/user/ReportInfoMapper.xml"/>
+        <mapper resource="sqlmap/user/UserMapper.xml"/>
+        <mapper resource="sqlmap/channel/ServerChannelMapper.xml"/>
+        <mapper resource="sqlmap/channel/ServerMenuMapper.xml"/>
+        <mapper resource="sqlmap/channel/ServerChannelMessageMapper.xml"/>
+        <mapper resource="sqlmap/user/UserMoreMapper.xml"/>
+        <mapper resource="sqlmap/version/VersionMapper.xml"/>
+        <mapper resource="sqlmap/askAndAnswerSearch/AskAndAnswerMapper.xml"/>
+        <mapper resource="sqlmap/mall/DaokeWalletMapper.xml"/>
+    </mappers>
+
+</configuration>

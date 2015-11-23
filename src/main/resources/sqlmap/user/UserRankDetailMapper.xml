@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="userRankDetail">
+    <select id="getRankingByAccountID" parameterType="java.lang.String" resultType="com.daoke.mobileserver.user.entity.UserRankDetail">
+        SELECT accountID,rankAll,rankMonth FROM userRankDetail WHERE isValid =1 and accountID = #{accountID}
+    </select>
+
+    <select id="getRankChannelMember" parameterType="java.lang.String" resultType="java.util.Map">
+            select a.accountID,b.name fromChannel,(CASE WHEN a.actionType=4  THEN '2'
+                   WHEN a.actionType=5  THEN '3' END) fType
+             from  userKeyInfo a
+             inner join checkSecretChannelInfo b
+             where a.customParameter = b.number and a.accountID=#{value}
+             and a.validity=1
+    </select>
+
+    <select id="getRankFriend" parameterType="java.lang.String" resultType="java.util.Map">
+        select DISTINCT friendAccountID accountID,1 fType from userFriend where accountID = #{value}
+    </select>
+
+    <select id="getRankListInfo" resultType="java.util.Map" parameterType="java.util.Map">
+        Select
+        dw.accountID,
+        CAST(${rankType} as CHAR) as itemValue,ifnull(nickName,'') nickName ,ifnull(userAreaCode,0) userAreaCode, ifnull(gender,0) gender,
+        ifnull(rr.recordID,0) grade, ifnull(rr.title,'微密新手') title ,userHeadName
+        ,ifnull(isAllowedOpinion,0) isAllowedOpinion, ifnull(isVerifyOpinion,0) isVerifyOpinion,IFNULL(cd.name,'') userArea
+        from daoke_wemeMonthIndex dw
+        LEFT JOIN userGrade ug on ug.accountID = dw.accountID and ug.isValid = 1
+        LEFT JOIN  ratingRules rr on rr.recordID = ug.grade and rr.isValid = 1
+        LEFT JOIN  friendSetting fs on dw.accountID = fs.accountID and fs.isValid = 1
+        LEFT JOIN  chinaDistrictInfo cd on cd.`code`=ug.userAreaCode
+        where dw.accountID in
+        <foreach item="item" index="index" collection="list1" open="(" separator="," close=")">
+            '${item.accountID}'
+        </foreach>
+
+        <if test="rankType == 'mileageCostTime' ">
+            and mileageSum >= 300
+        </if>
+            and dw.status = 0
+            order by ${rankType}
+        <if test="rankType != 'mileageCostTime'">
+            desc
+        </if>
+            limit 10
+
+    </select>
+
+   <!-- 查询当月排名 -->
+    <select id="getRankListInfoByShell" resultType="java.util.Map" parameterType="java.util.List">
+        select ug.accountID,ug.monthRochelle itemValue,ug.nickName,ug.gender,rr.recordID grade,rr.title,ug.userHeadName,IFNULL(cd.name,'') userArea
+        ,IFNULL(fs.isAllowedOpinion,1) isAllowedOpinion ,IFNULL(fs.isVerifyOpinion,0) isVerifyOpinion
+        from userGrade ug
+        LEFT JOIN  ratingRules rr on rr.recordID = ug.grade and rr.isValid = 1
+        LEFT JOIN  friendSetting fs on ug.accountID = fs.accountID and fs.isValid = 1
+        LEFT JOIN  chinaDistrictInfo cd on cd.`code`=ug.userAreaCode
+        where  ug.accountID in
+        <foreach item="item" index="index" collection= "list" open="(" separator="," close=")">
+            '${item.accountID}'
+        </foreach>
+        and ug.isValid = 1
+        ORDER BY itemValue desc limit 10
+    </select>
+    <!-- 查询全部排名 -->
+    <select id="getRankListInfoByShellAll" resultType="java.util.Map" parameterType="java.util.List">
+        SELECT ug.accountID,ug.rochelle itemValue,ug.nickName,ug.gender,rr.recordID grade,rr.title ,ug.userHeadName,IFNULL(cd.name,'') userArea,
+        ifnull(ff.isAllowedOpinion,1)  isAllowedOpinion,IFNULL(ff.isVerifyOpinion,0) isVerifyOpinion
+        from userGrade   ug
+        LEFT JOIN  ratingRules rr on rr.recordID = ug.grade and rr.isValid = 1
+        LEFT JOIN friendSetting ff on ff.accountID = ug.accountID and ff.isValid = 1
+        LEFT JOIN  chinaDistrictInfo cd on cd.`code`=ug.userAreaCode
+        where ug.accountID in
+        <foreach item="item" index="index" collection= "list" open="(" separator="," close=")">
+            '${item.accountID}'
+        </foreach>
+        and ug.isValid = 1
+        order by itemValue desc  limit 10
+
+    </select>
+     <!-- 里程總排名-->
+    <select id="getMileageSumRankList" resultType="com.daoke.mobileserver.user.entity.IndexRankingDetail">
+       select ud.accountID,cityNum,locusNum,hotNum,days,mileageSum,userAreaCode,gender,rr.recordID grade,rr.title,userHeadName from userDriverInfo ud
+        LEFT JOIN userGrade ug on ug.accountID = ud.accountID and ug.isValid = 1
+        LEFT JOIN  ratingRules rr on rr.recordID = ug.grade and rr.isValid =1
+        where accountID in
+        <foreach item="item" index="index" collection= "list1" open="(" separator="," close=")">
+            '${item.accountID}'
+        </foreach>
+        and ud.isValid = 1
+        order by  mileageSum  desc  limit 10
+    </select>
+     <!--查询月排名 -->
+    <select id="getMyselfRankInfoThisMonth" resultType="java.util.Map"
+            parameterType="java.util.Map" >
+       select CONCAT(CAST(FORMAT(
+            (select count(${rankType})*100 from daoke_wemeMonthIndex where status = 0 and ${rankType}<![CDATA[<]]>
+            (select max(${rankType}) from daoke_wemeMonthIndex where accountID='${accountID}' and FROM_UNIXTIME(dataTime)>= ${firstDay} )
+                                                                 and FROM_UNIXTIME(dataTime)>= ${firstDay} and status = 0 )
+            /
+            (select  count(0) from daoke_wemeMonthIndex where FROM_UNIXTIME(dataTime)>= ${firstDay} and status = 0 ),0) as CHAR),'%') precent,
+        CAST(${rankType} as CHAR) as itemValue, rr.title, rr.recordID grade,nickName,fs.isAllowedOpinion,fs.isVerifyOpinion,IFNULL(cd.name,'') userArea
+             <if test="rankType == 'mileageCostTime'">
+                 ,mileageSum
+             </if>
+            <if test="rankType == 'environmentalIndex'">
+                ,CAST(totalTravelCount as CHAR) totalTravelCount
+            </if>
+        <if test="rankType == 'taskIndex'">
+            ,(select 200-count(0) from userRochelleDetail
+            where ruleCode in ('bindWEME','grade10','grade20','grade30','grade40','grade50','grade60','settingNickName','grade80','grade10','exceed100DayOnce')
+            and accountID = '${accountID}' and isValid = 1) restRule
+        </if> ,userHeadName
+            from daoke_wemeMonthIndex dw
+             LEFT JOIN userGrade ug on ug.accountID = dw.accountID and ug.isValid = 1
+             LEFT JOIN  ratingRules rr on rr.recordID = ug.grade and rr.isValid = 1
+             LEFT JOIN friendSetting fs on fs.accountID = dw.accountID and fs.isValid = 1
+             LEFT JOIN  chinaDistrictInfo cd on cd.`code`=ug.userAreaCode
+            where dw.accountID='${accountID}' and FROM_UNIXTIME(dataTime)>= ${firstDay}
+              and dw.status = 0  limit 1
+    </select>
+
+    <select id="getRankMyselfInfoByShell" resultType="java.util.HashMap"
+            parameterType="java.util.Map"  >
+        select atb.present,atb.rochelle,ud.nickName,ud.userHeadName,ud.grade as grade,
+        rr.title
+        from (select CONCAT(CAST( FORMAT((
+        (select count(0) from (
+        select monthRochelle from userGrade where isValid =1
+        and monthRochelle <![CDATA[ < ]]> (select monthRochelle from userGrade as d where d.isValid=1 and  d.accountID='${accountID}' )
+        ) m)
+        /
+        (select count(0) from(select 0 from userGrade where isValid=1  GROUP BY accountID) n)*100 ),0) AS CHAR),'%')
+        as present,( select monthRochelle from userGrade as d where isValid=1 and d.accountID = '${accountID}' ) as rochelle,'${accountID}' accountID)  atb
+        LEFT JOIN
+        userGrade ud
+        on
+        ud.accountID = atb.accountID and ud.isValid = 1
+        LEFT JOIN
+        ratingRules rr
+        on
+        rr.recordID = ud.grade and rr.isValid = 1
+    </select>
+
+    <select id="getRankMyselfInfoByShellAll" resultType="java.util.HashMap"
+            parameterType="java.util.Map">
+        select
+        CONCAT(CAST( FORMAT(
+        ((select count(0) from userGrade where rochelle<![CDATA[<]]>(
+        select rochelle from userGrade where accountID = #{value} and isValid = 1
+        ) and isValid = 1)/
+        (select count(0) from userGrade where isValid = 1))*100,0) as char),'%') present,
+        (select rochelle from userGrade where accountID=#{value} AND isValid=1) rochelle,
+        (select ((select min(rochelle) from ratingRules where isValid=1 and rochelle>
+        (select rochelle from userGrade where accountID=#{value}) and isValid=1))-rochelle FROM userGrade where accountID=#{value} and isValid = 1) nextRochelle
+         </select>
+
+    <select id="getSelfInfo" resultType="java.util.Map"
+            parameterType="java.util.Map" >
+        select rr.title,ug.grade,ug.nickName,fs.isAllowedOpinion,fs.isVerifyOpinion,cd.`name` userArea,ug.userHeadName
+        from userGrade ug LEFT JOIN ratingRules rr on rr.recordID = ug.grade and rr.isValid = 1
+        LEFT JOIN friendSetting fs on fs.accountID = ug.accountID and fs.isValid = 1
+        LEFT JOIN  chinaDistrictInfo cd on cd.`code`=ug.userAreaCode
+        where ug.accountID = '${accountID}'
+        and ug.isValid = 1
+    </select>
+
+</mapper>
+

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="userTalkRecord">
+
+    <!--添加记录-->
+    <insert id="insert" parameterType="userTalkRecord" useGeneratedKeys="true" keyProperty="id" >
+          INSERT  INTO userTalkRecord(accountID,friendAccountID,talkContent,isValid,createTime) values(#{accountID},#{friendAccountID},#{talkContent},#{isValid},#{createTime})
+    </insert>
+
+    <!--查询聊天记录-->
+    <select id="queryTalkRecord" resultType="com.daoke.mobileserver.user.entity.UserTalkRecordVo">
+        SELECT
+        accountID,friendAccountID,talkContent,createTime,
+    (SELECT userHeadName FROM userGrade where isValid=1 AND accountID=#{accountID}) as accountHeadName,
+    (SELECT nickName FROM userGrade where isValid=1 AND accountID=#{accountID})  as accountNickName,
+    (SELECT userHeadName FROM userGrade where isValid=1 AND accountID=#{friendAccountID}) as friendAccountHeadName,
+    (SELECT nickName FROM userGrade where isValid=1 AND accountID=#{friendAccountID})  as friendAccountNickName
+    FROM
+    userTalkRecord
+    WHERE
+    isValid=1
+    AND
+    id=#{id} ;
+</select>
+</mapper>

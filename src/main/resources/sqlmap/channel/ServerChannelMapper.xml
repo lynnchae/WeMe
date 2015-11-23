@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="serverChannel">
+	<!--分页查询服务频道-->
+	<select id="pageQueryServerChannel" resultType="serverChannel">
+		SELECT * FROM serverChannel WHERE isValid=1 order BY createTime asc limit #{firstCount},#{pagesize}
+	</select>
+	<!--查询服务频道总数-->
+	<select id="pageQueryServerChannelCount" resultType="java.lang.Integer">
+		SELECT count(1) FROM serverChannel WHERE isValid=1
+	</select>
+	<!--查询是否加入车队-->
+	<select id="countJoinMcadeMember" resultType="java.lang.Integer">
+		SELECT count(1) FROM motorcadeMember WHERE isValid=1 AND memberAccountId=#{accountID}
+	</select>
+</mapper>

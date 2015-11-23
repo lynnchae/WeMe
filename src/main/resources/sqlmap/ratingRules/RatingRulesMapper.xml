@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ratingRules">
+    <!--根据用户ID查询用户等级-->
+   <select id="queryList" resultType="ratingRules">
+            SELECT * FROM ratingRules WHERE  isValid=1
+   </select>
+
+    <select id="getRatingRulesByRochelle" resultType="ratingRules">
+        <![CDATA[
+        SELECT * FROM ratingRules WHERE  isValid= 1 and rochelle <= #{rochelle} order by recordID desc  limit 1
+        	]]>
+    </select>
+
+    <select id="getMinRecord" resultType="ratingRules">
+        select * from ratingRules where isValid=1 order by recordID limit 1
+    </select>
+
+</mapper>

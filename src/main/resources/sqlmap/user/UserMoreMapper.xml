@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="userMore">
+    <select id="queryMoreList" resultType="com.daoke.mobileserver.more.entity.UserMore">
+      select * from userMore where isValid = 1 and isAd = 0 order by id desc
+    </select>
+
+    <select id="getAd" resultType="java.util.Map">
+        select picUrl,appName,url,remark from userMore where isValid = 1 and isAd = 1 order by createDate desc limit 1
+    </select>
+</mapper>

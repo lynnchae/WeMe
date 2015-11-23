@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="user">
+    <!--记录用户登录信息-->
+<!--    <insert id="insertUserLoginLog" parameterType ="userLoginLog" >
+		<![CDATA[
+			INSERT userloginLog(accountID,userName,loginTime,createDate)values(#{accountID},#{userName},CURDATE(),CURDATE())
+		]]>
+	</insert>-->
+    <insert id="insertIdentifyingCode" parameterType ="map" >
+        <![CDATA[
+        insert into validateCode(mobile,validateCode,validTime,isValid,createTime,type) VALUES(#{mobile},#{validateCode},${validTime},1,NOW(),#{type})
+		]]>
+    </insert>
+    <select id="findValidCode" resultType="int" parameterType ="map">
+         select count(0) from validateCode where  DATE_ADD(createTime,INTERVAL validTime MINUTE)>=now() and validateCode =#{validateCode}
+         and mobile=#{mobilePhone}
+    </select>
+</mapper>

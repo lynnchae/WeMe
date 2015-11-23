@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:jee="http://www.springframework.org/schema/jee"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd 
+					    http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd 
+					    http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-3.0.xsd 
+					    http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd 
+					    http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd"
+	default-lazy-init="true">
+
+
+	<description>Spring公共配置</description>
+
+	<!-- 定义受环境影响易变的变量 -->
+	<bean
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<!--<property name="systemPropertiesModeName" value="SYSTEM_PROPERTIES_MODE_OVERRIDE" />
+		<property name="ignoreResourceNotFound" value="true" />
+		<property name="ignoreUnresolvablePlaceholders" value="true" />-->
+		<property name="locations">
+			<list>
+				<!-- 数据库配置 -->
+				<value>classpath*:config/jdbc.properties</value>
+				<!-- 其它基础配置 -->
+				<value>classpath*:config/common.properties</value>
+                <!--api配置-->
+                <value>classpath*:config/api_config.properties</value>
+			</list>
+		</property>
+	</bean>
+
+	<!-- 激活利用注解进行装配 -->
+	<context:component-scan base-package="com.daoke.mobileserver">
+		<context:exclude-filter type="annotation"
+			expression="org.springframework.stereotype.Controller" />
+	</context:component-scan>
+
+
+    <!--公共配置属性 -->
+    <bean id="commonPoolInfo" class="org.apache.tomcat.jdbc.pool.DataSource"
+          destroy-method="close">
+        <property name="jmxEnabled" value="${Tomcat.jdbc.pool.jmxEnabled}"></property>
+        <property name="testWhileIdle" value="${Tomcat.jdbc.pool.testWhileIdle}"></property>
+        <property name="testOnBorrow" value="${Tomcat.jdbc.pool.testOnBorrow}"></property>
+        <property name="validationQuery"
+                  value="${Tomcat.jdbc.pool.validationQuery.sqlserverOrmysql}"></property>
+        <property name="testOnReturn" value="${Tomcat.jdbc.pool.testOnReturn}"></property>
+        <property name="validationInterval" value="${Tomcat.jdbc.pool.validationInterval}"></property>
+        <property name ="timeBetweenEvictionRunsMillis"
+                  value="${Tomcat.jdbc.pool.timeBetweenEvictionRunsMillis}"></property>
+        <property name="maxActive" value="${Tomcat.jdbc.pool.maxActive}"></property>
+        <property name="initialSize" value="${Tomcat.jdbc.pool.initialSize}"></property>
+        <property name="maxWait" value="${Tomcat.jdbc.pool.maxWait}"></property>
+        <property name="removeAbandoned" value="${Tomcat.jdbc.pool.removeAbandoned}"></property>
+        <property name="removeAbandonedTimeout" value="${Tomcat.jdbc.pool.removeAbandonedTimeout}"></property>
+        <property name="logAbandoned" value="${Tomcat.jdbc.pool.logAbandoned}"></property>
+        <property name="minEvictableIdleTimeMillis"
+                  value="${Tomcat.jdbc.pool.minEvictableIdleTimeMillis}"></property>
+        <property name="jdbcInterceptors" value="${Tomcat.jdbc.pool.jdbcInterceptors}"></property>
+    </bean>
+
+    <!-- 将DataSource weme 的数据源 做为默认数据源 -->
+    <bean id="dataSourceWeME" parent="commonPoolInfo">
+        <property name="driverClassName" value="${JDBC.Driver.WeMe}" />
+        <property name="url" value="${JDBC.ConnectionURL.WeMe}" />
+        <property name="username" value="${JDBC.Username.WeMe}" />
+        <property name="password" value="${JDBC.Password.WeMe}" />
+    </bean>
+
+    <!--WEMECustom数据库配置 -->
+    <bean id="dataSourceWEMECustom" parent="commonPoolInfo">
+        <property name="driverClassName" value="${JDBC.Driver.WEMECustom}" />
+        <property name="url" value="${JDBC.ConnectionURL.WEMECustom}" />
+        <property name="username" value="${JDBC.Username.WEMECustom}" />
+        <property name="password" value="${JDBC.Password.WEMECustom}" />
+    </bean>
+
+    <!--DateCenter数据库配置  -->
+    <bean id="dataSourceDatacenter" parent="commonPoolInfo">
+        <property name="driverClassName" value="${JDBC.Driver.DataCenter}" />
+        <property name="url" value="${JDBC.ConnectionURL.DataCenter}" />
+        <property name="username" value="${JDBC.Username.DataCenter}" />
+        <property name="password" value="${JDBC.Password.DataCenter}" />
+    </bean>
+
+    <!--app_MCade数据库配置  -->
+    <bean id="dataSourceMCade" parent="commonPoolInfo">
+        <property name="driverClassName" value="${JDBC.Driver.app_MCade}" />
+        <property name="url" value="${JDBC.ConnectionURL.app_MCade}" />
+        <property name="username" value="${JDBC.Username.app_MCade}" />
+        <property name="password" value="${JDBC.Password.app_MCade}" />
+    </bean>
+
+
+
+
+
+    <bean id="wemeJdbcTemplateWEMECustom" class="org.springframework.jdbc.core.JdbcTemplate">
+        <property name="dataSource" ref="dataSourceWEMECustom" />
+    </bean>
+
+
+    <!-- 配置weme jdbcTemplate -->
+    <bean id="wemeJdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+
+    <!-- 配置weme transactionManager -->
+    <bean id="wemeTransactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+
+    <!-- 采用动态数据源 -->
+    <bean id="dataSource"
+          class="com.daoke.mobileserver.common.dao.DynamicRoutingDataSource">
+        <property name="targetDataSources">
+            <map key-type="com.daoke.mobileserver.common.dao.DataSourceType">
+                <entry key="MOBILE_WEME" value-ref="dataSourceWeME"></entry>
+                <entry key="WEME_Custom" value-ref="dataSourceWEMECustom"></entry>
+                <entry key="DATA_Center" value-ref="dataSourceDatacenter"></entry>
+                <entry key="app_MCade" value-ref="dataSourceMCade"></entry>
+            </map>
+        </property>
+        <property name="defaultTargetDataSource" ref="dataSourceWeME"></property>
+    </bean>
+
+
+    <!-- mybatis -->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource" />
+        <property name="configLocation" value="classpath:sqlmap/sqlmap-config.xml" />
+    </bean>
+
+    <!-- 配置weme事务驱动 -->
+    <tx:annotation-driven transaction-manager="wemeTransactionManager" />
+
+
+
+
+
+    <!--<bean id="sqlMapClient" class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">-->
+        <!--<property name="configLocations">-->
+            <!--<list>-->
+                <!--<value>classpath:sqlmap/sqlmap-config.xml</value>-->
+            <!--</list>-->
+        <!--</property>-->
+    <!--</bean>-->
+
+
+    <!--<bean id="sqlSessionFactory1" class="org.mybatis.spring.SqlSessionFactoryBean">-->
+        <!--<property name="dataSource" ref="dataSourceWEMECustom" />-->
+        <!--<property name="configLocation" value="classpath:sqlmap/sqlmap-config.xml" />-->
+    <!--</bean>-->
+
+
+    <!--<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">-->
+        <!--<property name="sqlSessionFactoryBeanName" value="sqlSessionFactory1"></property>-->
+        <!--<property name="basePackage" value="aaa.bbb.one.*.dao" />-->
+    <!--</bean>-->
+
+
+
+    <!-- jedis pool配置 -->
+    <bean id="jedisPoolConfig" class="redis.clients.jedis.JedisPoolConfig">
+        <property name="maxActive" value="${redis.maxActive}" />
+        <property name="maxIdle" value="${redis.maxIdle}" />
+        <property name="maxWait" value="${redis.maxWait}" />
+        <!--
+        <property name="testOnBorrow" value="${redis.testOnBorrow}" />
+        -->
+    </bean>
+
+    <!-- spring data redis -->
+    <bean id="jedisConnectionFactory" class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory">
+        <property name="usePool" value="true"></property>
+        <property name="hostName" value="${redis.host}" />
+        <property name="port" value="${redis.port}" />
+        <!--<property name="password" value="${redis.pass}" />-->
+        <property name="timeout" value="${redis.timeout}" />
+        <!--<property name="database" value="${redis.default.db}"></property>-->
+        <constructor-arg index="0" ref="jedisPoolConfig" />
+    </bean>
+    <!-- driving spring data redis -->
+    <bean id="drivingJedisConnectionFactory" class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory">
+        <property name="usePool" value="true"></property>
+        <property name="hostName" value="${driving.redis.host}" />
+        <property name="port" value="${driving.redis.port}" />
+        <!--<property name="password" value="${redis.pass}" />-->
+        <property name="timeout" value="${driving.redis.timeout}" />
+        <!--<property name="database" value="${redis.default.db}"></property>-->
+        <constructor-arg index="0" ref="jedisPoolConfig" />
+    </bean>
+
+
+
+    <!-- Redis Template -->
+    <bean id="redisTemplate" class="org.springframework.data.redis.core.RedisTemplate">
+        <property name="connectionFactory" ref="jedisConnectionFactory" />
+    </bean>
+    <bean id="drivingRedisTemplate" class="org.springframework.data.redis.core.RedisTemplate">
+        <property name="connectionFactory" ref="drivingJedisConnectionFactory" />
+    </bean>
+
+
+    <!--消费谢尔值  mq配置-->
+    <bean id="ruleCodeRewardConfig" class="me.daoke.common.mq.util.MQConfig">
+        <property name="host1" value="${mq.ruleCodeReward.host1}" />
+        <property name="host2" value="${mq.ruleCodeReward.host2}" />
+        <property name="port1" value="${mq.ruleCodeReward.port1}" />
+        <property name="port2" value="${mq.ruleCodeReward.port2}" />
+        <property name="virtuaHost" value ="${mq.ruleCodeReward.virtuaHost}"/>
+        <property name="userName" value="${mq.ruleCodeReward.username}" />
+        <property name="passWord" value="${mq.ruleCodeReward.password}" />
+        <property name="queueName" value="${mq.ruleCodeReward.queuename}" />
+        <property name="exchangeName" value="${mq.ruleCodeReward.exchangname}"/>
+        <property name="prefetchCount" value="${mq.prefetchCount}"/>
+    </bean>
+
+    <!-- 单播模式 -->
+    <bean id="receiveRochelleMessage" class="me.daoke.common.mq.client.ReceiveMessage">
+        <constructor-arg ref="ruleCodeRewardConfig">
+        </constructor-arg>
+    </bean>
+
+
+
+</beans>

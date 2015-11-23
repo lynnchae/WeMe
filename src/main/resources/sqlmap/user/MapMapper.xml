@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="map">
+    <!--查询热点-->
+	<select id="queryPowerOffHot" resultType="com.daoke.mobileserver.map.entity.PowerOffHotVo" >
+		SELECT longitude,latitude,provinceName FROM daoke_powerOffHot a
+		WHERE status=0
+		AND accountID=#{accountID}
+        and provinceName = ( select b.provinceName
+        					   from daoke_powerOffHot b
+        					  WHERE status=0 AND accountID=#{accountID} order by hotcount desc limit 1)
+		order by hotcount desc limit 10;
+	</select>
+	<!--查询城市编码-->
+	<select id="queryCityCode" resultType="java.lang.String">
+		SELECT CONCAT(cityName,',',frequency,',',cityCode) FROM daoke_userArriveCity
+		WHERE status=0 AND accountID=#{accountID}
+		order by frequency
+	</select>
+	<!--查询用户驾驶信息-->
+	<select id="queryUserDriveInfoVo" resultType="com.daoke.mobileserver.user.entity.UserDriveInfoVo">
+		SELECT cityNum,locusNum,hotNum,days,mileageSum FROM userDriverInfo WHERE isValid=1 AND accountID=#{accountID} limit 1
+	</select>
+
+    <select id="queryMapCityCode" resultType="java.util.Map">
+        SELECT name,code FROM chinaDistrictInfo
+    </select>
+    <!--获取用户去过的城市-->
+    <select id="queryUserArriveCity" resultType="java.util.Map">
+        select cityName,CAST( FROM_UNIXTIME(firstArriveTime) AS char) firstArriveTime from daoke_userArriveCity where accountID = #{value} and status = 0 order by createTime desc
+    </select>
+</mapper>

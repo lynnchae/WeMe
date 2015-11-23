@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="userGrade">
+    <!--根据用户ID查询用户等级-->
+   <select id="queryByAccountID" parameterType="java.lang.String" resultType="userGrade">
+            SELECT * FROM userGrade WHERE accountID=#{accountID} AND isValid=1
+   </select>
+    <!-- 添加用户等级-->
+    <insert id="insertUserGrade" parameterType="userGrade" >
+            INSERT INTO userGrade(accountID,grade,rochelle,monthRochelle,isValid,nickName,rewardRochelleMonth) VALUES(#{accountID},#{grade},#{rochelle},#{monthRochelle},#{isValid},#{nickName},#{rewardRochelleMonth})
+    </insert>
+
+    <!-- 修改用户等级-->
+    <update id="updateUserGrade" parameterType="userGrade">
+          UPDATE userGrade SET grade=#{grade},rochelle=#{rochelle},monthRochelle=#{monthRochelle},nickName=#{nickName},rewardRochelleMonth=#{rewardRochelleMonth} where isValid =1 and accountID=#{accountID}
+    </update>
+    <!-- 修改用户头像-->
+    <update id="uploadHeadImage" parameterType="java.util.Map">
+        UPDATE userGrade SET userHeadName=#{userHeadUrl} where isValid =1 and accountID=#{accountID}
+    </update>
+    <!-- 修改用户头像-->
+    <update id="updateUserInfo" parameterType="java.util.Map">
+        UPDATE userGrade
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="userHeadUrl!=null and userHeadUrl!=''">
+                userHeadName=#{userHeadUrl} ,
+            </if>
+            <if test="nickName!=null and nickName!=''">
+                nickName=#{nickName} ,
+            </if>
+            <if test="gender!=null and gender!=''">
+                gender=#{gender},
+            </if>
+            <if test="gender == null or gender ==''">
+                gender=1,
+            </if>
+            <if test="userAreaCode!=null and userAreaCode!=''">
+                userAreaCode=#{userAreaCode}
+            </if>
+        </trim>
+        where isValid =1 and accountID=#{accountID}
+    </update>
+    <!--<update id="updateUserInfo" parameterType="java.util.Map">-->
+        <!--UPDATE userGrade SET nickName=#{nickName},userAreaCode=#{userArea},gender=#{gender} where accountID=#{accountID}-->
+    <!--</update>-->
+
+    <!--全部share值排名-->
+    <select id="rankingAllRochelle" resultType="com.daoke.mobileserver.user.entity.UserGrade">
+        SELECT accountID,userHeadName,nickName,grade,rochelle FROM userGrade WHERE isValid = 1 ORDER BY rochelle DESC LIMIT #{start},#{finish}
+    </select>
+    <!--月share值排名-->
+    <select id="rankingMonthRochelle" resultType="com.daoke.mobileserver.user.entity.UserGrade">
+        SELECT accountID,userHeadName,nickName,grade,rochelle
+        FROM userGrade
+        WHERE isValid = 1 AND UNIX_TIMESTAMP(modifyDate) BETWEEN #{startTime} AND #{endTime} ORDER BY rochelle DESC LIMIT #{start},#{finish}
+    </select>
+    <!--查询用户头像列表-->
+    <select id="queryUserFriendDetailList" parameterType="java.util.List" resultType="com.daoke.mobileserver.user.entity.UserDetailVo">
+            SELECT accountID,userHeadName,nickName,gender,userAreaCode
+            FROM
+            userGrade
+            WHERE
+            isValid = 1 AND
+                <foreach collection="list" item="friendAccountID" open="("  close=")" separator="OR"  >
+                    accountID=#{friendAccountID}
+                </foreach>
+    </select>
+</mapper>

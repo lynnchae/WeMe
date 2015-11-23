@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="userRochelleDetail">
+    <!--记录用户谢尔值变化情况情况-->
+
+    <insert id="insertUserRochelleDetail" parameterType="userRochelleDetail" useGeneratedKeys="true" keyProperty="recordID" keyColumn="recordID">
+          INSERT INTO userRochelleDetail(accountID,imei,ruleCode,rochelle,receiveStatus,isValid) VALUES(#{accountID},#{imei},#{ruleCode},#{rochelle},#{receiveStatus},#{isValid})
+   </insert>
+
+    <!--查询用户谢尔值奖励明细-->
+    <select id="queryByAccountIDAndRuleCode" parameterType="userRochelleDetail" resultType="userRochelleDetail">
+        SELECT * FROM userRochelleDetail WHERE
+         isValid=1
+        <if test="accountID != null ">
+            AND accountID=#{accountID}
+        </if>
+        <if test="ruleCode != null ">
+            AND ruleCode=#{ruleCode}
+        </if>
+        <if test ="recordID != null and recordID > 0">
+            AND recordID=#{recordID}
+        </if>
+        <if test ="createDate != null">
+            and DATE_FORMAT(createDate,'%Y-%m-%d')  = DATE_FORMAT(#{createDate},'%Y-%m-%d')
+        </if>
+
+    </select>
+
+   <!-- <select id="getDetailUserList" parameterType="userRochelleDetail" resultType="java.util.Map">
+          SELECT grade.accountID,rating.title as gradeTitle
+            ,grade.rochelle
+            ,(select min(rochelle) from ratingRules where  rochelle>grade.rochelle)-grade.rochelle as nextGradeRochelle
+            ,idx.influenceIndex,idx.closeIndex,idx.interactIndex
+            ,idx.meetIndex
+            ,task.addMileageSum
+            ,task.mileageCostTime
+            ,task.mePoint
+            ,task.driverDays
+            ,task.driverGrade
+            ,task.tweetCount
+            ,task.taskIndex
+            ,task.environmentalIndex
+            ,dinfo.cityNum
+            ,dinfo.locusNum
+            ,dinfo.hotNum
+            ,dinfo.days
+            ,dinfo.mileageSum
+            from userGrade grade
+            LEFT JOIN
+            ratingRules rating on grade.grade=rating.recordID
+            LEFT JOIN
+            userIndex idx on  idx.accountID=grade.accountID
+            LEFT JOIN
+            userTaskStars task on task.accountID=grade.accountID
+            LEFT JOIN
+            userDriverInfo dinfo on dinfo.accountID=grade.accountID
+             where grade.accountID=#{value}
+
+    </select>-->
+    <select id="getDetailUserList" parameterType="userRochelleDetail" resultType="java.util.Map">
+         SELECT grade.accountID,rating.title as gradeTitle
+            ,grade.rochelle
+            ,(select min(rochelle) from ratingRules where  rochelle>grade.rochelle)-grade.rochelle as nextGradeRochelle
+            ,idx.influenceIndex,idx.closeIndex,idx.interactIndex
+            ,idx.meetIndex
+            ,task.MileageSum addMileageSum
+            ,task.mileageCostTime
+            ,task.mePoint
+            ,task.driverDays
+            ,task.driverGrade
+            ,task.tweetCount
+            ,task.taskIndex
+            ,task.environmentalIndex
+            ,dinfo.cityNum
+            ,dinfo.locusNum
+            ,dinfo.hotNum
+            ,dinfo.days
+            ,dinfo.mileageSum
+            ,grade.grade
+			,(select count(0)+1 from userGrade
+			                  where isValid = 1
+			                  <if test=" list !=null  and list.size() > 0   ">
+                                  and accountID in
+                                  <foreach item="item" index="index" collection= "list" open="(" separator="," close=")">
+                                      '${item.accountID}'
+                                  </foreach>
+                              </if>
+			                  and  rochelle >
+			                                   (select rochelle FROM userGrade
+			                                   where accountID = #{accountID}
+			                                   and isValid = 1)) allRanking
+			,( select count(0)+1 from userGrade
+			                     where isValid = 1
+                                    <if test=" list !=null and list.size() > 0 ">
+                                        and accountID in
+                                        <foreach item="item" index="index" collection= "list" open="(" separator="," close=")">
+                                            '${item.accountID}'
+                                        </foreach>
+                                    </if>
+                                   and monthRochelle >
+			                                      (select monthRochelle FROM userGrade
+			                                        where accountID =#{accountID}
+			                                          and isValid = 1 )) monthRanking
+            from userGrade grade
+            LEFT JOIN
+            ratingRules rating on grade.grade=rating.recordID and rating.isValid = 1
+            LEFT JOIN
+            daoke_wemeIndex idx on  idx.accountID=grade.accountID     and idx.status =0
+            LEFT JOIN
+            daoke_wemeMonthIndex task on task.accountID=grade.accountID and task.status =0 and FROM_UNIXTIME(task.dataTime)>= DATE_ADD(curdate(),interval -day(curdate())+1 day)
+            LEFT JOIN
+            userDriverInfo dinfo on dinfo.accountID=grade.accountID    and dinfo.isValid =1
+             where grade.accountID=#{accountID}   and grade.isValid = 1  limit 1
+    </select>
+
+
+    <update id="updateUserGradeWhitTotalChelle" parameterType="java.util.Map">
+        <![CDATA[
+
+         update userGrade a set grade=(select MAX(recordID)
+         from ratingRules where
+         rochelle=(select min(b.rochelle) from ratingRules b where rochelle >= a.rochelle+#{rochelle})),rochelle=rochelle+#{rochelle}
+           where accountID = #{accountID}
+
+        ]]>
+    </update>
+
+
+     <!--修改谢尔值表中领取状态-->
+    <update id="updateUserRochelleReceiveStatus" parameterType="java.util.Map">
+        update userRochelleDetail set receiveStatus =#{receiveStatus} ,modifyDate = current_timestamp()  where isValid =1
+        <if test="accountID != null ">
+            and accountID =#{accountID}
+         </if>
+        and  recordID = #{recordID}
+    </update>
+
+</mapper>

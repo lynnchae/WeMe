@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="friendSetting">
+
+    <!--根据用户ID查询-->
+    <select id="queryByAccountID" resultType="friendSetting" >
+        SELECT * FROM friendSetting WHERE isValid=1 and accountID=#{accountID}
+    </select>
+
+    <!--根据用户ID list查询-->
+    <select id="queryUserSettingList"  resultType="com.daoke.mobileserver.user.entity.UserDetailVo" >
+        SELECT accountID, isAllowedOpinion,isVerifyOpinion FROM friendSetting WHERE isValid=1
+            and
+            <foreach collection="list" item="friendAccount"  open="("  close=")" separator="OR">
+                accountID=#{friendAccount.accountID}
+            </foreach>
+    </select>
+    <!--添加用户设置-->
+    <insert id="insert" parameterType="friendSetting">
+        INSERT INTO friendSetting(accountID,isAllowedOpinion,isVerifyOpinion,isReceiveNotifyOpinion,isValid)
+         VALUES(#{accountID},#{isAllowedOpinion},#{isVerifyOpinion},#{isReceiveNotifyOpinion},#{isValid});
+    </insert>
+    <!--更新用户设置-->
+    <update id="updateFriendSetting" parameterType="friendSetting">
+        UPDATE friendSetting set isAllowedOpinion=#{isAllowedOpinion} ,isVerifyOpinion=#{isVerifyOpinion} , isReceiveNotifyOpinion=#{isReceiveNotifyOpinion}
+        WHERE isValid=1 AND accountID=#{accountID}
+    </update>
+</mapper>

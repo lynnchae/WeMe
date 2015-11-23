@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="userRochelleRule">
+    <!--通过ruleCode查询谢尔值-->
+    <select id="queryRochelleByRuleCode" parameterType="java.lang.String" resultType="java.lang.Integer">
+	   SELECT rochell FROM userRochelleRule WHERE ruleCode=#{ruleCode} AND isValid=1
+   </select>
+
+     <!--初始所有任务规则到内存-->
+    <select id="queryAllRochelle" resultType="UserRochelleRule">
+        select ruleID ,ruleName ,ruleType,rochell,ruleCode,terminalText,messageCenterText,mobileText  from userRochelleRule  where isValid = 1
+    </select>
+     <select id="queryRochellReceiveStatus" resultType="java.util.Map" parameterType="java.util.Map">
+         select ruleName,ur.rochell,case when receiveStatus is null THEN -1
+																else receiveStatus
+																end  receiveStatus,ud.recordID rewardID
+         from userRochelleRule ur
+                left JOIN userRochelleDetail ud on
+                 ur.ruleCode =ud.ruleCode and ud.isValid  = 1
+                and ud.accountID = #{accountID}
+                <if test="ruleType != 4">
+                and ud.createDate >= #{createDate}
+                </if>
+        where ruleType =#{ruleType}
+          and ur.isValid = 1
+     </select>
+</mapper>
+
+

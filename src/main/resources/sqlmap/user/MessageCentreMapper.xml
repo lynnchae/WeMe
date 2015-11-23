@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="messageCentre">
+
+    <!--添加-->
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id" >
+        INSERT  INTO messageCenter(msgTitle,accountID,content,param,messageType,senderAccountID,isValid,isRead,createTime) values(#{msgTitle},#{accountID},#{content},#{param},#{messageType},#{senderAccountID},#{isValid},#{isRead},#{createTime});
+    </insert>
+    <!--查询推送消息数-->
+    <select id="queryMessageCentreCount" resultType="java.lang.Integer" >
+        select count(1) from messageCenter WHERE isValid=1 AND accountID=#{accountID}
+        <if test="messageType!=null and messageType !=''">
+            AND messageType=#{messageType}
+        </if>
+    </select>
+    <!--查询新消息数-->
+    <select id="countNewMessageCentre" resultType="java.lang.Integer" >
+        select count(1) from messageCenter WHERE isValid=1 AND accountID=#{accountID} AND isRead=0
+    </select>
+    <!--查询推送消息-->
+    <select id="queryMessageCentre" resultType="messageCentre" >
+        select mc.*,ug.userHeadName senderUserHeadName from messageCenter mc LEFT JOIN  userGrade ug  on mc.accountID=ug.accountID WHERE mc.isValid=1 AND mc.accountID=#{accountID}
+        <if test="messageType!=null and messageType !=''">
+            AND mc.messageType=#{messageType}
+        </if>
+        order BY mc.createTime desc limit #{firstCount},#{pagesize}
+    </select>
+    <!--修改为已读信息-->
+    <update id="updateMessageIsRead" >
+        UPDATE messageCenter SET isRead=1 WHERE isRead=0 AND id=#{messageID}
+    </update>
+    <!--修改同意拒绝状态-->
+    <update id="updateMessageIsAgree" >
+        UPDATE messageCenter SET isAgree=#{isAgree} WHERE  id=#{messageID}
+    </update>
+    <!--逻辑删除-->
+    <update id="removeMessageCentre" >
+        UPDATE messageCenter SET isValid=0 WHERE 1=1
+         <if test="messageCentreIDList!=null">
+             AND
+             <foreach collection="messageCentreIDList" item="id" open="("  close=")" separator="OR" >
+                  id=#{id}
+             </foreach>
+         </if>
+        <if test="accountID!=null">
+            AND  accountID=#{accountID}
+        </if>
+    </update>
+</mapper>
