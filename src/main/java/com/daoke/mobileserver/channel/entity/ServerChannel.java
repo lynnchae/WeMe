@@ -1,7 +1,6 @@
 package com.daoke.mobileserver.channel.entity;
 
 import org.codehaus.jackson.annotate.JsonIgnore;
-import org.junit.Ignore;
 
 import java.io.Serializable;
 
